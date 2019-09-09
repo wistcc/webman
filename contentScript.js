@@ -185,7 +185,7 @@
 
                     if (width < (viewPortWidth * 0.8) &&
                         height < (viewPortHeight * 0.8) &&
-                        width > 30 && height > 30 &&
+                        width > 30 && height > 10 &&
                         this.isFreePoint(x, y) &&
                         !this.playerIsInside(x, y, width, height)) {
                         const style = getComputedStyle(el);
