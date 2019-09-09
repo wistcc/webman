@@ -194,7 +194,7 @@
                             style.visibility === 'visible' &&
                             style.opacity >= 0.1 &&
                             style.clip === 'auto') {
-                            el.style.cssText = 'border: 2px solid rgb(27, 118, 196) !important'
+                            el.style.cssText = 'border: 2px solid rgb(27, 118, 196) !important; background-color: rgb(27, 118, 196, 0.5) !important'
                             const platform = this.platforms.create(x, y, '', '', false).setOrigin(0, 0);
                             platform.displayWidth = width
                             platform.displayHeight = height
