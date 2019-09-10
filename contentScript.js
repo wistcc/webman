@@ -1,11 +1,39 @@
 (function () {
     let myCanvas;
+    let game;
+    let score = 0
+    const pageElements = [];
+
     chrome.extension.sendRequest({ command: 'getLoadGame' });
-    chrome.runtime.onMessage.addListener(() => {
-        if (!myCanvas) {
-            startGame()
+    chrome.runtime.onMessage.addListener((request) => {
+        switch (request.command) {
+            case 'loadGame':
+                startGame()
+                break;
+            case 'cleanUp':
+                cleanUp()
+                break;
         }
     });
+
+    function cleanUp () {
+        game.destroy(true);
+        game = null;
+
+        myCanvas.parentNode.removeChild(myCanvas);
+        myCanvas = null;
+
+        document.body.setAttribute('style', '');
+        pageElements.forEach(el => {
+            el.setAttribute('style', '');
+        });
+
+        setScore()
+    }
+
+    function setScore () {
+        chrome.extension.sendRequest({ command: 'setScore', score });
+    }
 
     function startGame() {
         myCanvas = document.createElement("canvas");
@@ -13,9 +41,19 @@
         document.body.appendChild(myCanvas);
         document.activeElement.blur()
 
-        let score = 0
+        score = 0
         const viewPortWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
         const viewPortHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        
+        const isInViewport = elem => {
+            const bounding = elem.getBoundingClientRect();
+            return (
+                bounding.top >= 0 &&
+                bounding.left >= 0 &&
+                bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        };
 
         class Game extends Phaser.Scene {
             constructor() {
@@ -26,7 +64,6 @@
                 this.load.image('bomb', chrome.extension.getURL('assets/bomb.png'));
                 this.load.image('player', chrome.extension.getURL('/assets/player.png'))
                 this.load.image('star', chrome.extension.getURL('/assets/star.png'));
-                this.load.image('font', chrome.extension.getURL('assets/font.png'));
             }
             create() {
                 myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgba(0,0,0,0.2)')
@@ -163,7 +200,7 @@
                     .setInteractive()
                     .once('pointerup', () => this.scene.start('Game'));
 
-                chrome.extension.sendRequest({ command: 'setScore', score });
+                setScore()
             }
             createPlatforms() {
                 const elements = [
@@ -183,7 +220,8 @@
                 elements.forEach(el => {
                     const { x, y, width, height } = el.getBoundingClientRect()
 
-                    if (width < (viewPortWidth * 0.8) &&
+                    if (isInViewport(el) &&
+                        width < (viewPortWidth * 0.8) &&
                         height < (viewPortHeight * 0.8) &&
                         width > 30 && height > 10 &&
                         this.isFreePoint(x, y) &&
@@ -198,7 +236,7 @@
                             const platform = this.platforms.create(x, y, '', '', false).setOrigin(0, 0);
                             platform.displayWidth = width
                             platform.displayHeight = height
-                            platform.el = el
+                            pageElements.push(el)
                         }
                     }
                 })
@@ -235,7 +273,7 @@
             }
         }
 
-        new Phaser.Game({
+        game = new Phaser.Game({
             width: viewPortWidth,
             height: viewPortHeight,
             type: Phaser.AUTO,

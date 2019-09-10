@@ -8,9 +8,8 @@ chrome.extension.onRequest.addListener((request) => {
         case 'getLoadGame':
             if (loadGame) {
                 chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-                    chrome.tabs.sendMessage(tabs[0].id, loadGame);
-                }
-                );
+                    chrome.tabs.sendMessage(tabs[0].id, { command: 'loadGame', value: loadGame });
+                });
             }
             break
         case 'setScore':
@@ -26,32 +25,26 @@ chrome.browserAction.onClicked.addListener(function (tab) {
     loadGame = !loadGame
     if (loadGame) {
         chrome.browserAction.setIcon({ path: 'assets/logoOn.png' });
-        chrome.tabs.sendMessage(tab.id, loadGame);
+        chrome.tabs.sendMessage(tab.id, { command: 'loadGame', value: loadGame });
 
         if (highScore) {
             chrome.browserAction.setBadgeText({ text: highScore.toString() })
         }
     } else {
+        chrome.tabs.sendMessage(tab.id, { command: 'cleanUp' });
         chrome.browserAction.setBadgeText({ text: '' })
         chrome.browserAction.setIcon({ path: 'assets/logoOff.png' });
     }
 });
 
-chrome.runtime.onMessage.addListener((request, _, callback) => {
-    switch (request.command) {
-        case 'setLoadGame':
-            if (!request.value) {
-                loadGame = request.value
-                return
-            }
-            chrome.tabs.query({ currentWindow: true, active: true }, (tabs) => {
-                loadGame = request.value
-                chrome.tabs.sendMessage(tabs[0].id, request.value);
-            }
-            );
-            break
-        case 'getLoadGame':
-            callback(loadGame);
-            break
+chrome.runtime.onInstalled.addListener(function (details) {
+    if (details.reason == "install" || details.reason == "update") {
+        chrome.tabs.query({}, (tabs) => {
+            tabs.forEach(tab => {
+                chrome.tabs.executeScript(tab.id, { file: "./phaser.js" }, () => {
+                    chrome.tabs.executeScript(tab.id, { file: "./contentScript.js" });
+                });
+            });
+        });
     }
 });
