@@ -23,6 +23,7 @@
         myCanvas.parentNode.removeChild(myCanvas);
         myCanvas = null;
 
+        document.querySelector('html').setAttribute('style', '')
         document.body.setAttribute('style', '');
         pageElements.forEach(el => {
             el.setAttribute('style', '');
@@ -38,6 +39,7 @@
     function startGame() {
         myCanvas = document.createElement("canvas");
         document.body.setAttribute('style', 'overflow: hidden;')
+        document.querySelector('html').setAttribute('style', 'overflow: hidden;')
         document.body.appendChild(myCanvas);
         document.activeElement.blur()
 
