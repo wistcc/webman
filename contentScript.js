@@ -77,6 +77,8 @@
                 myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgba(0,0,0,0.2)')
                 score = 0
                 this.isGameOver = false
+                this.playerHorizontalOffset = 10
+                this.playerVerticalOffset = 15
                 // Parameters: x position, y position, name of the sprite
                 this.player = this.physics.add.sprite(100, 100, 'player');
                 //scale evenly
@@ -173,9 +175,14 @@
 
                 var x = (this.player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
                 var bomb = this.bombs.create(x, 16, 'bomb');
+                
+                const scale = Phaser.Math.Between(1, 3);
+                bomb.scaleX = scale
+                bomb.scaleY = scale
+
                 bomb.setBounce(1);
                 bomb.setCollideWorldBounds(true);
-                bomb.setVelocity(200, 200);
+                bomb.setVelocity(Phaser.Math.Between(50, 400), Phaser.Math.Between(50, 400));
             }
             gameOver() {
                 myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgba(0,0,0,0.5)')
@@ -216,11 +223,11 @@
                     const { x, y, width, height } = el.getBoundingClientRect()
 
                     if (isInViewport(el) &&
-                        width < (viewPortWidth * 0.8) &&
-                        height < (viewPortHeight * 0.8) &&
-                        width > 30 && height > 10 && width < 260 && height < 260 &&
+                        width < (viewPortWidth * 0.2) &&
+                        height < (viewPortHeight * 0.2) &&
+                        width > 30 && height > 10 &&
                         this.isFreePoint(x, y, width, height, false) &&
-                        !this.playerIsInside(x, y, width, height)) {
+                        !this.playerCollidesWithPlatform(x, y, width, height)) {
                         const style = getComputedStyle(el);
 
                         if (style.display !== 'none' &&
@@ -238,7 +245,7 @@
             }
             checkPlatformOverlapping() {
                 this.platforms.children.entries.forEach(platform => {
-                    if (this.playerIsInside(platform.x, platform.y, platform.displayWidth, platform.displayHeight)) {
+                    if (this.playerCollidesWithPlatform(platform.x, platform.y, platform.displayWidth, platform.displayHeight)) {
                         this.gameOver()
                         return
                     }
@@ -276,11 +283,29 @@
                 return false
             }
             playerCollidesWithBomb(player, bomb) {
-                return this.object1ContainsObject2(player, bomb, 10, 15, 5, 5)
+                const bombOffset = 4 
+                return this.object1ContainsObject2(player, bomb, this.playerHorizontalOffset, this.playerVerticalOffset, bombOffset * bomb.scaleX, bombOffset * bomb.scaleY)
             }            
-            playerIsInside(x, y, width, height) {
+            playerCollidesWithPlatform(x, y, width, height) {
                 const platform = { x, y }
-                return this.object1ContainsObject2(platform, this.player, width, height, 10, 15, false, true)
+                return this.object1ContainsObject2(
+                        platform,
+                        this.player,
+                        width,
+                        height,
+                        this.playerHorizontalOffset,
+                        this.playerVerticalOffset,
+                        false,
+                        true)
+                    || this.object1ContainsObject2(
+                        this.player,
+                        platform,
+                        this.playerHorizontalOffset,
+                        this.playerVerticalOffset,
+                        width,
+                        height,
+                        true,
+                        false)
             }
             isFreePoint(x, y, width, height, isInitialPointCentered) {
                 let isFree = true
