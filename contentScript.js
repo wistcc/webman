@@ -106,7 +106,7 @@
                 this.physics.add.overlap(this.player, this.bombs, this.gameOver, null, this);
 
                 this.spacebarKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-                this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+                this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
                 this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
                 this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
                 this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
@@ -114,7 +114,7 @@
             }
             update() {
                 if (this.isGameOver) {
-                    if (this.spacebarKey.isDown || this.enterKey.isDown) {
+                    if (this.spacebarKey.isDown || this.escKey.isDown) {
                         this.scene.start('Game')
                     }
                     return
@@ -136,7 +136,7 @@
                     this.player.y -= 15;
                 }
 
-                this.checkPlatformOverlaping()
+                this.checkPlatformOverlapping()
             }
             addStar() {
                 let newX
@@ -180,7 +180,7 @@
                 const y = this.cameras.main.height / 2;
 
                 let style = { font: '40px Arial', fill: '#fff' };
-                const startButton = this.add.text(x, y, 'Press [ ENTER ] or [ SPACE ] to restart game', style)
+                const startButton = this.add.text(x, y, 'Press [ ESC ] or [ SPACE ] to restart game', style)
                     .setOrigin(0.5, 1);
 
                 this.add.tween({
@@ -243,7 +243,7 @@
                     }
                 })
             }
-            checkPlatformOverlaping() {
+            checkPlatformOverlapping() {
                 this.platforms.children.entries.forEach(platform => {
                     if (this.playerIsInside(platform.x, platform.y, platform.displayWidth, platform.displayHeight)) {
                         this.gameOver()
