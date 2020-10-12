@@ -103,7 +103,7 @@
                 this.scoreText = this.add.text(20, 20, 'Score: ' + score, style);
 
                 this.arrow = this.input.keyboard.createCursorKeys();
-                this.physics.add.overlap(this.player, this.bombs, this.gameOver, null, this);
+                this.physics.add.overlap(this.player, this.bombs, this.gameOver, this.playerCollidesWithBomb, this);
 
                 this.spacebarKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
                 this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -145,7 +145,7 @@
                 do {
                     newX = Phaser.Math.Between(30, viewPortWidth - 30);
                     newY = Phaser.Math.Between(30, viewPortHeight - 30);
-                } while (!this.isFreePoint(newX, newY, 24, 22))
+                } while (!this.isFreePoint(newX, newY, 24, 22, true))
 
                 this.star.x = newX
                 this.star.y = newY
@@ -212,7 +212,7 @@
                         width < (viewPortWidth * 0.8) &&
                         height < (viewPortHeight * 0.8) &&
                         width > 30 && height > 10 && width < 260 && height < 260 &&
-                        this.isFreePoint(x, y, width, height) &&
+                        this.isFreePoint(x, y, width, height, false) &&
                         !this.playerIsInside(x, y, width, height)) {
                         const style = getComputedStyle(el);
 
@@ -237,60 +237,71 @@
                     }
                 })
             }
-            playerIsInside(x, y, width, height) {
-                const offsetTop = 20
-                const offsetBottom = 20
-                if ((this.player.x >= x && (this.player.y - offsetTop) >= y &&
-                    this.player.x <= (x + width) && (this.player.y - offsetTop) <= (y + height)) ||
-                    (this.player.x >= x && (this.player.y + offsetBottom) >= y &&
-                        this.player.x <= (x + width) && (this.player.y + offsetBottom) <= (y + height))) {
+            object1ContainsObject2(object1, object2,
+                object1HorizontalOffset = 0, object1VerticalOffset = 0, object2HorizontalOffset = 0, object2VerticalOffset = 0,
+                isObject1InitialPointCentered = true, isObject2InitialPointCentered = true) {
+                const object1X = object1.x - (isObject1InitialPointCentered ? object1HorizontalOffset : 0)
+                const object1X2 = object1.x + object1HorizontalOffset
+                const object1Y = object1.y - (isObject1InitialPointCentered ? object1VerticalOffset : 0)
+                const object1Y2 = object1.y + object1VerticalOffset
+
+                const object2X = object2.x - (isObject2InitialPointCentered ? object2HorizontalOffset : 0)
+                const object2X2 = object2.x + object2HorizontalOffset
+                const object2Y = object2.y - (isObject2InitialPointCentered ? object2VerticalOffset : 0)
+                const object2Y2 = object2.y + object2VerticalOffset
+                
+                // [object2X,object2Y] is contained by the platform element
+                if (object2X >= object1X && object2Y >= object1Y && object2X <= object1X2 && object2Y <= object1Y2) {
+                    return true
+                }
+                // [object2X, object2Y2] is contained by the platform element
+                else if (object2X >= object1X && object2Y2 >= object1Y && object2X <= object1X2 && object2Y2 <= object1Y2) {
+                    return true
+                }
+                // [object2X2, object2Y] is contained by the platform element
+                else if (object2X2 >= object1X && object2Y >= object1Y && object2X2 <= object1X2 && object2Y <= object1Y2) {
+                    return true
+                }
+                // [object2X2, object2Y2] is contained by the platform element
+                else if (object2X2 >= object1X && object2Y2 >= object1Y && object2X2 <= object1X2 && object2Y2 <= object1Y2) {
                     return true
                 }
                 return false
             }
-            isFreePoint(x, y, width, height) {
+            playerCollidesWithBomb(player, bomb) {
+                return this.object1ContainsObject2(player, bomb, 10, 15, 5, 5)
+            }            
+            playerIsInside(x, y, width, height) {
+                const platform = { x, y }
+                return this.object1ContainsObject2(platform, this.player, width, height, 10, 15, false, true)
+            }
+            isFreePoint(x, y, width, height, isInitialPointCentered) {
                 let isFree = true
-                const x2 = x + width
-                const y2 = y + height
+                const newElement = { x, y }
+                const platformOffset = 50
 
                 this.platforms.children.entries.forEach(platform => {
-                    const offset = 50
-                    const platformX1 = platform.x - offset
-                    const platformX2 = platform.x + platform.displayWidth + offset
-                    const platformY1 = platform.y - offset
-                    const platformY2 = platform.y + platform.displayHeight + offset
-
-                    // [x1,y1] is contained by the platform element
-                    if (x >= platformX1 && y >= platformY1 && x <= platformX2 && y <= platformY2) {
+                    if (this.object1ContainsObject2(
+                            newElement,
+                            platform,
+                            width,
+                            height,
+                            platform.displayWidth + platformOffset,
+                            platform.displayHeight + platformOffset,
+                            isInitialPointCentered,
+                            true)
+                        || this.object1ContainsObject2(
+                            platform,
+                            newElement,
+                            platform.displayWidth + platformOffset,
+                            platform.displayHeight + platformOffset,
+                            width,
+                            height,
+                            true,
+                            isInitialPointCentered)
+                        ) {
                         isFree = false
-                    }
-                    // [x1, y2] is contained by the platform element
-                    else if (x >= platformX1 && y2 >= platformY1 && x <= platformX2 && y2 <= platformY2) {
-                        isFree = false
-                    }
-                    // [x2, y1] is contained by the platform element
-                    else if (x2 >= platformX1 && y >= platformY1 && x2 <= platformX2 && y <= platformY2) {
-                        isFree = false
-                    }
-                    // [x2, y2] is contained by the platform element
-                    else if (x2 >= platformX1 && y2 >= platformY1 && x2 <= platformX2 && y2 <= platformY2) {
-                        isFree = false
-                    }
-                    // [platformX1,platformY1] is contained by the point
-                    if (platformX1 >= x && platformY1 >= y && platformX1 <= x2 && platformY1 <= y2) {
-                        isFree = false
-                    }
-                    // [platformX1, platformY2] is contained by the point
-                    else if (platformX1 >= x && platformY2 >= y && platformX1 <= x2 && platformY2 <= y2) {
-                        isFree = false
-                    }
-                    // [platformX2, platformY1] is contained by the point
-                    else if (platformX2 >= x && platformY1 >= y && platformX2 <= x2 && platformY1 <= y2) {
-                        isFree = false
-                    }
-                    // [platformX2, platformY2] is contained by the point
-                    else if (platformX2 >= x && platformY2 >= y && platformX2 <= x2 && platformY2 <= y2) {
-                        isFree = false
+                        return;
                     }
                 })
                 return isFree
