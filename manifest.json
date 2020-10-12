@@ -20,6 +20,7 @@
     },
     "web_accessible_resources": [
         "/assets/star.png",
+        "/assets/backgroundStar.png",
         "/assets/player.png",
         "/assets/bomb.png",
         "/assets/logoOn.png",

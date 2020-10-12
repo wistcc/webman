@@ -72,13 +72,23 @@
                 this.load.image('bomb', chrome.extension.getURL('assets/bomb.png'));
                 this.load.image('player', chrome.extension.getURL('/assets/player.png'))
                 this.load.image('star', chrome.extension.getURL('/assets/star.png'));
+                this.load.image('backgroundStar', chrome.extension.getURL('/assets/backgroundStar.png'));
             }
             create() {
-                myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgba(0,0,0,0.2)')
+                myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgb(10,0,20,0.7)')
                 score = 0
                 this.isGameOver = false
                 this.playerHorizontalOffset = 10
                 this.playerVerticalOffset = 15
+
+                this.stars = this.physics.add.group({})
+
+                for (let i =0; i <= 140; i++) {
+                    const star = this.stars.create(Phaser.Math.Between(0, viewPortWidth), Phaser.Math.Between(0, viewPortHeight), 'backgroundStar', 0)
+                    star.scaleX = 0.1
+                    star.scaleY = 0.1
+                }
+
                 // Parameters: x position, y position, name of the sprite
                 this.player = this.physics.add.sprite(100, 100, 'player');
                 //scale evenly
@@ -95,7 +105,7 @@
                 this.add.tween({
                     targets: [this.star],
                     ease: k => k < 0.5 ? 0 : 1,
-                    duration: 100,
+                    duration: 450,
                     yoyo: true,
                     repeat: -1,
                     alpha: 0.5
@@ -185,7 +195,7 @@
                 bomb.setVelocity(Phaser.Math.Between(50, 400), Phaser.Math.Between(50, 400));
             }
             gameOver() {
-                myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgba(0,0,0,0.5)')
+                myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgb(10,0,20,0.7)')
                 this.isGameOver = true
                 this.physics.pause();
                 this.player.setTint(0xff0000);
@@ -200,7 +210,7 @@
                 this.add.tween({
                     targets: [startButton],
                     ease: k => k < 0.5 ? 0 : 1,
-                    duration: 250,
+                    duration: 450,
                     yoyo: true,
                     repeat: -1,
                     alpha: 0
@@ -234,7 +244,7 @@
                             style.visibility === 'visible' &&
                             style.opacity >= 0.1 &&
                             style.clip === 'auto') {
-                            el.style.cssText = 'border: 2px solid rgb(27, 118, 196) !important; background-color: rgb(27, 118, 196, 0.5) !important'
+                            el.style.cssText = 'border: 2px solid rgb(255, 255, 255, 0.6) !important; z-index: 999999999 !important; position: relative !important; background-color: rgb(255, 255, 255, 0.3) !important; pointer-events: none !important;'
                             const platform = this.platforms.create(x, y, '', '', false).setOrigin(0, 0);
                             platform.displayWidth = width
                             platform.displayHeight = height
