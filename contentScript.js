@@ -125,15 +125,15 @@
                 }
 
                 if (this.arrow.right.isDown || this.dKey.isDown) {
-                    this.player.x += 15;
+                    this.player.x += 10;
                 } else if (this.arrow.left.isDown || this.aKey.isDown) {
-                    this.player.x -= 15;
+                    this.player.x -= 10;
                 }
 
                 if (this.arrow.down.isDown || this.sKey.isDown) {
-                    this.player.y += 15;
+                    this.player.y += 10;
                 } else if (this.arrow.up.isDown || this.wKey.isDown) {
-                    this.player.y -= 15;
+                    this.player.y -= 10;
                 }
 
                 this.checkPlatformOverlapping()
