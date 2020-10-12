@@ -2,7 +2,7 @@
     let myCanvas;
     let game;
     let score = 0
-    const pageElements = [];
+    let pageElements = [];
 
     chrome.extension.sendRequest({ command: 'getLoadGame' });
     chrome.runtime.onMessage.addListener((request) => {
@@ -11,23 +11,27 @@
                 startGame()
                 break;
             case 'cleanUp':
-                cleanUp()
+                cleanUp(true)
                 break;
         }
     });
 
-    function cleanUp () {
-        game.destroy(true);
-        game = null;
+    function cleanUp (hardCleanUp = false) {
+        if (hardCleanUp) {
+            game.destroy(true);
+            game = null;
 
-        myCanvas.parentNode.removeChild(myCanvas);
-        myCanvas = null;
+            myCanvas.parentNode.removeChild(myCanvas);
+            myCanvas = null;
+            
+            document.querySelector('html').setAttribute('style', '')
+            document.body.setAttribute('style', '');
+        }
 
-        document.querySelector('html').setAttribute('style', '')
-        document.body.setAttribute('style', '');
         pageElements.forEach(el => {
             el.setAttribute('style', '');
         });
+        pageElements = []
 
         setScore()
     }
@@ -37,10 +41,12 @@
     }
 
     function startGame() {
-        myCanvas = document.createElement("canvas");
-        document.body.setAttribute('style', 'overflow: hidden;')
-        document.querySelector('html').setAttribute('style', 'overflow: hidden;')
-        document.body.appendChild(myCanvas);
+        if (!myCanvas) {
+            myCanvas = document.createElement("canvas");
+            document.body.setAttribute('style', 'overflow: hidden;')
+            document.querySelector('html').setAttribute('style', 'overflow: hidden;')
+            document.body.appendChild(myCanvas);
+        }
         document.activeElement.blur()
 
         score = 0
@@ -115,13 +121,14 @@
             update() {
                 if (this.isGameOver) {
                     if (this.spacebarKey.isDown || this.escKey.isDown) {
+                        cleanUp()
                         this.scene.start('Game')
                     }
                     return
                 }
 
                 if (this.physics.overlap(this.player, this.star)) {
-                    this.hit();
+                    this.getStar();
                 }
 
                 if (this.arrow.right.isDown || this.dKey.isDown) {
@@ -150,7 +157,7 @@
                 this.star.x = newX
                 this.star.y = newY
             }
-            hit() {
+            getStar() {
                 this.addStar()
                 score += 10;
 
