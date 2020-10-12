@@ -106,7 +106,7 @@
                 this.physics.add.overlap(this.player, this.bombs, this.gameOver, null, this);
 
                 this.spacebarKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-                this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
+                this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
                 this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
                 this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
                 this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
@@ -114,7 +114,7 @@
             }
             update() {
                 if (this.isGameOver) {
-                    if (this.spacebarKey.isDown || this.enterKey.isDown) {
+                    if (this.spacebarKey.isDown || this.escKey.isDown) {
                         this.scene.start('Game')
                     }
                     return
@@ -136,7 +136,7 @@
                     this.player.y -= 15;
                 }
 
-                this.checkPlatformOverlaping()
+                this.checkPlatformOverlapping()
             }
             addStar() {
                 let newX
@@ -145,7 +145,7 @@
                 do {
                     newX = Phaser.Math.Between(30, viewPortWidth - 30);
                     newY = Phaser.Math.Between(30, viewPortHeight - 30);
-                } while (!this.isFreePoint(newX, newY))
+                } while (!this.isFreePoint(newX, newY, 24, 22))
 
                 this.star.x = newX
                 this.star.y = newY
@@ -180,7 +180,7 @@
                 const y = this.cameras.main.height / 2;
 
                 let style = { font: '40px Arial', fill: '#fff' };
-                const startButton = this.add.text(x, y, 'Press [ ENTER ] or [ SPACE ] to restart game', style)
+                const startButton = this.add.text(x, y, 'Press [ ESC ] or [ SPACE ] to restart game', style)
                     .setOrigin(0.5, 1);
 
                 this.add.tween({
@@ -205,28 +205,14 @@
                 setScore()
             }
             createPlatforms() {
-                const elements = [
-                    ...document.querySelectorAll('button'),
-                    ...document.querySelectorAll('input'),
-                    ...document.querySelectorAll('select'),
-                    ...document.querySelectorAll('h1'),
-                    ...document.querySelectorAll('h2'),
-                    ...document.querySelectorAll('h3'),
-                    ...document.querySelectorAll('h4'),
-                    ...document.querySelectorAll('h5'),
-                    ...document.querySelectorAll('h6'),
-                    ...document.querySelectorAll('p'),
-                    ...document.querySelectorAll('li'),
-                    ...document.querySelectorAll('a'),
-                ]
-                elements.forEach(el => {
+                document.querySelectorAll('*').forEach(el => {
                     const { x, y, width, height } = el.getBoundingClientRect()
 
                     if (isInViewport(el) &&
                         width < (viewPortWidth * 0.8) &&
                         height < (viewPortHeight * 0.8) &&
-                        width > 30 && height > 10 &&
-                        this.isFreePoint(x, y) &&
+                        width > 30 && height > 10 && width < 260 && height < 260 &&
+                        this.isFreePoint(x, y, width, height) &&
                         !this.playerIsInside(x, y, width, height)) {
                         const style = getComputedStyle(el);
 
@@ -243,7 +229,7 @@
                     }
                 })
             }
-            checkPlatformOverlaping() {
+            checkPlatformOverlapping() {
                 this.platforms.children.entries.forEach(platform => {
                     if (this.playerIsInside(platform.x, platform.y, platform.displayWidth, platform.displayHeight)) {
                         this.gameOver()
@@ -262,12 +248,48 @@
                 }
                 return false
             }
-            isFreePoint(x, y) {
+            isFreePoint(x, y, width, height) {
                 let isFree = true
+                const x2 = x + width
+                const y2 = y + height
+
                 this.platforms.children.entries.forEach(platform => {
-                    const offset = 35
-                    if (x >= (platform.x - offset) && y >= (platform.y - offset) &&
-                        x <= (platform.x + platform.displayWidth + offset) && y <= (platform.y + platform.displayHeight + offset)) {
+                    const offset = 50
+                    const platformX1 = platform.x - offset
+                    const platformX2 = platform.x + platform.displayWidth + offset
+                    const platformY1 = platform.y - offset
+                    const platformY2 = platform.y + platform.displayHeight + offset
+
+                    // [x1,y1] is contained by the platform element
+                    if (x >= platformX1 && y >= platformY1 && x <= platformX2 && y <= platformY2) {
+                        isFree = false
+                    }
+                    // [x1, y2] is contained by the platform element
+                    else if (x >= platformX1 && y2 >= platformY1 && x <= platformX2 && y2 <= platformY2) {
+                        isFree = false
+                    }
+                    // [x2, y1] is contained by the platform element
+                    else if (x2 >= platformX1 && y >= platformY1 && x2 <= platformX2 && y <= platformY2) {
+                        isFree = false
+                    }
+                    // [x2, y2] is contained by the platform element
+                    else if (x2 >= platformX1 && y2 >= platformY1 && x2 <= platformX2 && y2 <= platformY2) {
+                        isFree = false
+                    }
+                    // [platformX1,platformY1] is contained by the point
+                    if (platformX1 >= x && platformY1 >= y && platformX1 <= x2 && platformY1 <= y2) {
+                        isFree = false
+                    }
+                    // [platformX1, platformY2] is contained by the point
+                    else if (platformX1 >= x && platformY2 >= y && platformX1 <= x2 && platformY2 <= y2) {
+                        isFree = false
+                    }
+                    // [platformX2, platformY1] is contained by the point
+                    else if (platformX2 >= x && platformY1 >= y && platformX2 <= x2 && platformY1 <= y2) {
+                        isFree = false
+                    }
+                    // [platformX2, platformY2] is contained by the point
+                    else if (platformX2 >= x && platformY2 >= y && platformX2 <= x2 && platformY2 <= y2) {
                         isFree = false
                     }
                 })
