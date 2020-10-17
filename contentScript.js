@@ -136,14 +136,12 @@
                 this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
                 this.sKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S);
                 this.dKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D);
-                this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
 
                 this.input.keyboard.on('keyup', ({key}) => { 
                     if((key === 'p' || key === ' ') && !this.isGameOver) {
                         this.scene.pause()
                         this.scene.launch('Pause');
                     }
-                    console.log(key)
                  })
             }
             update() {
