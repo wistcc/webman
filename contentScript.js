@@ -88,6 +88,7 @@
 
                 for (let i =0; i <= 140; i++) {
                     const star = this.stars.create(Phaser.Math.Between(0, viewPortWidth), Phaser.Math.Between(0, viewPortHeight), 'backgroundStar', 0)
+                    star.alpha = Phaser.Math.Between(5, 10) / 10
                     star.scaleX = 0.1
                     star.scaleY = 0.1
                 }
