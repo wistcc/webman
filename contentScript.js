@@ -131,7 +131,6 @@
                 this.physics.add.collider(this.player, this.platforms, () => this.gameOver())
                 this.physics.add.collider(this.player, this.star, () => this.getStar())
 
-                this.spacebarKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
                 this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
                 this.wKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W);
                 this.aKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A);
@@ -140,15 +139,16 @@
                 this.pKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
 
                 this.input.keyboard.on('keyup', ({key}) => { 
-                    if(key === 'p' && !this.isGameOver) {
+                    if((key === 'p' || key === ' ') && !this.isGameOver) {
                         this.scene.pause()
                         this.scene.launch('Pause');
                     }
+                    console.log(key)
                  })
             }
             update() {
                 if (this.isGameOver) {
-                    if (this.spacebarKey.isDown || this.escKey.isDown) {
+                    if (this.escKey.isDown) {
                         cleanUp()
                         this.scene.start('Game')
                     }
@@ -215,7 +215,7 @@
                 const y = this.cameras.main.height / 2;
 
                 let style = { font: '40px Arial', fill: '#fff' };
-                const startButton = this.add.text(x, y, 'Press [ ESC ] or [ SPACE ] to restart game', style)
+                const startButton = this.add.text(x, y, 'Press [ ESC ] to restart game', style)
                     .setOrigin(0.5, 1);
 
                 this.add.tween({
@@ -359,7 +359,7 @@
             }
             create() {
                 this.input.keyboard.on('keyup', ({key}) => { 
-                    if(key === 'p') {
+                    if(key === 'p' || key === ' ') {
                         this.scene.stop()
                         this.scene.resume('Game');
                     }
