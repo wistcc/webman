@@ -6,7 +6,7 @@
 
 The Webman game.
 
-In a world where the page elements are obstacles and there are asteroids everywhere, help Webman to collet stars all over the web.
+In a world where the page elements are obstacles and there are asteroids everywhere, help Webman to collect stars all over the web.
 
 You just need to click the extension icon to activate it and Webman's adventures will start.
 
