@@ -121,7 +121,10 @@
                 this.scoreText = this.add.text(20, 20, 'Score: ' + score, style);
 
                 this.arrow = this.input.keyboard.createCursorKeys();
-                this.physics.add.overlap(this.player, this.bombs, this.gameOver, this.playerCollidesWithBomb, this);
+                this.physics.add.collider(this.bombs, this.platforms)
+                this.physics.add.collider(this.player, this.bombs, () => this.gameOver())
+                this.physics.add.collider(this.player, this.platforms, () => this.gameOver())
+                this.physics.add.collider(this.player, this.star, () => this.getStar())
 
                 this.spacebarKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
                 this.escKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
@@ -139,10 +142,6 @@
                     return
                 }
 
-                if (this.physics.overlap(this.player, this.star)) {
-                    this.getStar();
-                }
-
                 if (this.arrow.right.isDown || this.dKey.isDown) {
                     this.player.x += 10;
                 } else if (this.arrow.left.isDown || this.aKey.isDown) {
@@ -154,8 +153,6 @@
                 } else if (this.arrow.up.isDown || this.wKey.isDown) {
                     this.player.y -= 10;
                 }
-
-                this.checkPlatformOverlapping()
             }
             addStar() {
                 let newX
@@ -246,20 +243,13 @@
                             style.clip === 'auto') {
                             el.style.cssText = 'border: 2px solid rgb(255, 255, 255, 0.6) !important; z-index: 999999999 !important; position: relative !important; background-color: rgb(255, 255, 255, 0.3) !important; pointer-events: none !important;'
                             const platform = this.platforms.create(x, y, '', '', false).setOrigin(0, 0);
-                            platform.displayWidth = width
-                            platform.displayHeight = height
+                            platform.body.width = width
+                            platform.body.height = height
                             pageElements.push(el)
                         }
                     }
                 })
-            }
-            checkPlatformOverlapping() {
-                this.platforms.children.entries.forEach(platform => {
-                    if (this.playerCollidesWithPlatform(platform.x, platform.y, platform.displayWidth, platform.displayHeight)) {
-                        this.gameOver()
-                        return
-                    }
-                })
+                this.platforms.refresh()
             }
             object1ContainsObject2(object1, object2,
                 object1HorizontalOffset = 0, object1VerticalOffset = 0, object2HorizontalOffset = 0, object2VerticalOffset = 0,
@@ -291,11 +281,7 @@
                     return true
                 }
                 return false
-            }
-            playerCollidesWithBomb(player, bomb) {
-                const bombOffset = 4 
-                return this.object1ContainsObject2(player, bomb, this.playerHorizontalOffset, this.playerVerticalOffset, bombOffset * bomb.scaleX, bombOffset * bomb.scaleY)
-            }            
+            }          
             playerCollidesWithPlatform(x, y, width, height) {
                 const platform = { x, y }
                 return this.object1ContainsObject2(
@@ -355,7 +341,12 @@
             height: viewPortHeight,
             type: Phaser.AUTO,
             canvas: myCanvas,
-            physics: { default: 'arcade' },
+            physics: {
+                default: 'arcade',
+                arcade: {
+                    debug: false
+                }
+            },
             scene: [
                 Game,
             ],
