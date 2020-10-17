@@ -6,6 +6,7 @@
     let pageElements = [];
     const BASE_SCORE = 10
     const EXTRA_SCORE = 5
+    const PLATFORM_COLOR = Phaser.Display.Color.GetColor32(255, 255, 255);
 
     chrome.extension.sendRequest({ command: 'getLoadGame' });
     chrome.runtime.onMessage.addListener((request) => {
@@ -59,8 +60,8 @@
         const isInViewport = elem => {
             const bounding = elem.getBoundingClientRect();
             return (
-                bounding.top >= 0 &&
-                bounding.left >= 0 &&
+                bounding.top >= (bounding.left <= 200 ? 60 : 0) &&
+                bounding.left >= (bounding.top <= 60 ? 200 : 0) &&
                 bounding.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
                 bounding.right <= (window.innerWidth || document.documentElement.clientWidth)
             );
@@ -81,8 +82,8 @@
                 myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgb(10,0,20,0.7)')
                 score = 0
                 this.isGameOver = false
-                this.playerHorizontalOffset = 10
-                this.playerVerticalOffset = 15
+                this.playerHorizontalOffset = 20
+                this.playerVerticalOffset = 25
 
                 this.stars = this.physics.add.group({})
 
@@ -246,10 +247,13 @@
                             style.visibility === 'visible' &&
                             style.opacity >= 0.1 &&
                             style.clip === 'auto') {
-                            el.style.cssText = 'border: 2px solid rgb(255, 255, 255, 0.6) !important; z-index: 999999999 !important; position: relative !important; background-color: rgb(255, 255, 255, 0.3) !important; pointer-events: none !important;'
-                            const platform = this.platforms.create(x, y, '', '', false).setOrigin(0, 0);
+                            const platform = this.platforms.create(x, y, '', '', true).setOrigin(0, 0);
                             platform.body.width = width
                             platform.body.height = height
+                            platform.displayWidth = width
+                            platform.displayHeight = height
+                            platform.setTintFill(PLATFORM_COLOR)
+                            platform.alpha = 0.4
                             pageElements.push(el)
                         }
                     }
@@ -319,15 +323,15 @@
                             platform,
                             width,
                             height,
-                            platform.displayWidth + platformOffset,
-                            platform.displayHeight + platformOffset,
+                            platform.body.width + platformOffset,
+                            platform.body.height + platformOffset,
                             isInitialPointCentered,
                             true)
                         || this.object1ContainsObject2(
                             platform,
                             newElement,
-                            platform.displayWidth + platformOffset,
-                            platform.displayHeight + platformOffset,
+                            platform.body.width + platformOffset,
+                            platform.body.height + platformOffset,
                             width,
                             height,
                             true,
