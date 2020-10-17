@@ -73,7 +73,7 @@
             }
 
             preload() {
-                this.load.image('bomb', chrome.extension.getURL('assets/bomb.png'));
+                this.load.image('asteroid', chrome.extension.getURL('assets/asteroid.png'));
                 this.load.image('player', chrome.extension.getURL('/assets/player.png'))
                 this.load.image('star', chrome.extension.getURL('/assets/star.png'));
                 this.load.image('backgroundStar', chrome.extension.getURL('/assets/backgroundStar.png'));
@@ -92,19 +92,24 @@
                     star.alpha = Phaser.Math.Between(5, 10) / 10
                     star.scaleX = 0.1
                     star.scaleY = 0.1
+                    star.body.debugShowBody = false
                 }
 
                 // Parameters: x position, y position, name of the sprite
                 this.player = this.physics.add.sprite(100, 100, 'player');
-                //scale evenly
-                this.player.scaleX = 0.2;
-                this.player.scaleY = 0.2;
+                this.player.body.setSize(
+                    100,
+                    180,
+                    this.player.x,
+                    this.player.y
+                )
+                this.player.setScale(0.2)
                 this.player.setCollideWorldBounds(true);
 
                 this.platforms = this.physics.add.staticGroup();
                 this.createPlatforms()
 
-                this.bombs = this.physics.add.group({})
+                this.asteroids = this.physics.add.group({})
 
                 this.star = this.physics.add.sprite(0, 0, 'star');
                 this.add.tween({
@@ -126,8 +131,8 @@
                 this.scoreText = this.add.text(20, 20, 'Score: ' + score, style);
 
                 this.arrow = this.input.keyboard.createCursorKeys();
-                this.physics.add.collider(this.bombs, this.platforms)
-                this.physics.add.collider(this.player, this.bombs, () => this.gameOver())
+                this.physics.add.collider(this.asteroids, this.platforms)
+                this.physics.add.collider(this.player, this.asteroids, () => this.gameOver())
                 this.physics.add.collider(this.player, this.platforms, () => this.gameOver())
                 this.physics.add.collider(this.player, this.star, () => this.getStar())
 
@@ -193,15 +198,19 @@
                 });
 
                 var x = (this.player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-                var bomb = this.bombs.create(x, 16, 'bomb');
-                
-                const scale = Phaser.Math.Between(1, 3);
-                bomb.scaleX = scale
-                bomb.scaleY = scale
+                var asteroid = this.asteroids.create(x, 16, 'asteroid');
 
-                bomb.setBounce(1);
-                bomb.setCollideWorldBounds(true);
-                bomb.setVelocity(Phaser.Math.Between(50, 400), Phaser.Math.Between(50, 400));
+                const scale = Phaser.Math.Between(1, 3)
+                asteroid.body.setSize(
+                    asteroid.body.width * 0.6,
+                    asteroid.body.height * 0.6,
+                    1, 1
+                )
+                asteroid.setScale(scale)
+
+                asteroid.setBounce(1);
+                asteroid.setCollideWorldBounds(true);
+                asteroid.setVelocity(Phaser.Math.Between(50, 400), Phaser.Math.Between(50, 400));
             }
             gameOver() {
                 myCanvas.setAttribute('style', 'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgb(10,0,20,0.7)')
