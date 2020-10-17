@@ -2,7 +2,10 @@
     let myCanvas;
     let game;
     let score = 0
+    let scoreCounter = 0
     let pageElements = [];
+    const BASE_SCORE = 10
+    const EXTRA_SCORE = 5
 
     chrome.extension.sendRequest({ command: 'getLoadGame' });
     chrome.runtime.onMessage.addListener((request) => {
@@ -168,7 +171,8 @@
             }
             getStar() {
                 this.addStar()
-                score += 10;
+                score += BASE_SCORE + (scoreCounter * EXTRA_SCORE);
+                scoreCounter++
 
                 this.scoreText.setText('Score: ' + score);
 
