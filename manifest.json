@@ -1,42 +1,31 @@
 {
-    "name": "Webman",
-    "version": "1.2",
-    "description": "The Webman game",
-    "icons": {
-        "16": "/assets/logoOn.png",
-        "48": "/assets/logo48.png",
-       "128": "/assets/logo128.png"
-    },
-    "permissions": [
-        "*://*/*"
-    ],
-    "background": {
-        "scripts": [
-            "background.js"
-        ],
-        "persistent": true
-    },
-    "browser_action": {
-    },
-    "web_accessible_resources": [
-        "/assets/star.png",
-        "/assets/backgroundStar.png",
-        "/assets/player.png",
-        "/assets/asteroid.png",
-        "/assets/logoOn.png",
-        "/assets/logoOff.png"
-    ],
-    "content_scripts": [
-        {
-            "matches": [
-                "http://*/*",
-                "https://*/*"
-            ],
-            "js": [
-                "phaser.js",
-                "contentScript.js"
-            ]
-        }
-    ],
-    "manifest_version": 2
+  "name": "Webman",
+  "version": "1.2",
+  "description": "The Webman game",
+  "icons": {
+    "16": "/assets/logoOn.png",
+    "48": "/assets/logo48.png",
+    "128": "/assets/logo128.png"
+  },
+  "permissions": ["*://*/*"],
+  "background": {
+    "scripts": ["background.js"],
+    "persistent": true
+  },
+  "browser_action": {},
+  "web_accessible_resources": [
+    "/assets/star.png",
+    "/assets/backgroundStar.png",
+    "/assets/player.png",
+    "/assets/asteroid.png",
+    "/assets/logoOn.png",
+    "/assets/logoOff.png"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["http://*/*", "https://*/*"],
+      "js": ["phaser.js", "contentScript.js"]
+    }
+  ],
+  "manifest_version": 2
 }
