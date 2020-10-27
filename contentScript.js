@@ -8,6 +8,10 @@
   const EXTRA_SCORE = 5
   const PLATFORM_COLOR = Phaser.Display.Color.GetColor32(255, 255, 255)
 
+  const getStarValue = () => {
+    return BASE_SCORE + scoreCounter * EXTRA_SCORE
+  }
+
   chrome.extension.sendRequest({ command: 'getLoadGame' })
   chrome.runtime.onMessage.addListener((request) => {
     switch (request.command) {
@@ -157,11 +161,11 @@
         )
         this.physics.add.collider(this.player, this.star, (_, star) => {
           const { x, y } = this.star
-          const feedback = `+${BASE_SCORE + scoreCounter * EXTRA_SCORE}`
+          const feedback = `+${getStarValue()}`
 
           const scoreIncrease = this.add.text(x, y, feedback, {
             font: '10px Arial',
-            fill: '#fff',
+            fill: '#fed140',
           })
 
           const timeline = this.tweens.timeline({
@@ -225,7 +229,7 @@
       }
       getStar() {
         this.addStar()
-        score += BASE_SCORE + scoreCounter * EXTRA_SCORE
+        score += getStarValue()
         scoreCounter++
 
         this.scoreText.setText('Score: ' + score)
