@@ -155,7 +155,25 @@
         this.physics.add.collider(this.player, this.platforms, () =>
           this.gameOver()
         )
-        this.physics.add.collider(this.player, this.star, () => this.getStar())
+        this.physics.add.collider(this.player, this.star, (_, star) => {
+          const { x, y } = this.star
+          const feedback = `+${BASE_SCORE + scoreCounter * EXTRA_SCORE}`
+
+          const scoreIncrease = this.add.text(x, y, feedback, {
+            font: '10px Arial',
+            fill: '#fff',
+          })
+
+          const timeline = this.tweens.timeline({
+            targets: scoreIncrease,
+            ease: 'Quad.easeInOut',
+            duration: 500,
+            tweens: [{ y: y - 50 }],
+          })
+
+          timeline.setCallback('onComplete', () => scoreIncrease.destroy())
+          this.getStar()
+        })
 
         this.escKey = this.input.keyboard.addKey(
           Phaser.Input.Keyboard.KeyCodes.ESC
