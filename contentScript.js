@@ -44,6 +44,11 @@
     setScore()
   }
 
+  function cleanUpScore() {
+    score = 0
+    scoreCounter = 0
+  }
+
   function setScore() {
     chrome.extension.sendRequest({ command: 'setScore', score })
   }
@@ -57,7 +62,7 @@
     }
     document.activeElement.blur()
 
-    score = 0
+    cleanUpScore()
     const viewPortWidth = Math.max(
       document.documentElement.clientWidth,
       window.innerWidth || 0
@@ -101,7 +106,9 @@
           'style',
           'position: fixed; left: 0; top: 0; z-index: 99999999; background-color: rgb(10,0,20,0.7)'
         )
-        score = 0
+        
+        cleanUpScore()
+
         this.isGameOver = false
         this.playerHorizontalOffset = 20
         this.playerVerticalOffset = 25
